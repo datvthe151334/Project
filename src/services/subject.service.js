@@ -1,44 +1,37 @@
 const { Op } = require('sequelize');
-// @ts-ignore
-const { GroupMembers, UserMaster, Group } = require('../models');
-const ErrorResponse = require('../libs/error-response');
 const queryParams = require('../utils/query-params');
-const getAccountFromToken = require('../utils/account-token');
-class GroupMembersService {
+const ErrorResponse = require('../libs/response');
+const successResponse = require('../libs/response');
+// @ts-ignore
+const { Subject } = require('../models');
+class SubjectService {
     async fncFindOne(req) {
         const { id } = req.params;
 
-        return GroupMembers.findOne({
+        return Subject.findOne({
             where: { ID: id },
-            include: [
-                {
-                    model: UserMaster,
-                },
-            ],
         });
     }
 
     async fncCreateOne(req) {
-        return GroupMembers.create({
+        return Subject.create({
             ...req.body,
-            CreatedBy: getAccountFromToken(req),
         });
     }
 
-    async fncFindMany(req, next) {
-        const queries = queryParams(req.query, Op, [], ['GroupID', 'MemberID', 'Status', 'CreatedDate']);
+    async fncFindAll(req) {
+        const queries = queryParams(
+            req.query,
+            Op,
+            //
+            ['Name',"Code"],
+            ['Name',"Code"]
+        );
 
-        return GroupMembers.findAndCountAll({
-            order: queries.order,
+        return Subject.findAndCountAll({
+            order: [['CreatedDate', 'DESC']],
             where: queries.searchOr,
-            include: [
-                {
-                    model: Group,
-                },
-                {
-                    model: UserMaster,
-                },
-            ],
+         
             distinct: true,
             limit: queries.limit,
             offset: queries.offset,
@@ -46,37 +39,36 @@ class GroupMembersService {
     }
 
     async fncUpdateOne(req, next) {
+        const { id } = req.params;
         const found = await this.fncFindOne(req);
 
-        if (!found) return next(new ErrorResponse(404, 'GroupMembers not found'));
+        if (!found) return next(new ErrorResponse(404, 'Subject not found'));
 
-        return GroupMembers.update(
+        return Subject.update(
             {
-                UpdatedBy: getAccountFromToken(req),
                 ...req.body,
             },
             {
-                where: {
-                    ID: +req.params.id,
-                },
+                where: { ID: id },
             }
         );
     }
 
     async fncDeleteOne(req, next) {
         const { id } = req.params;
-
         const found = await this.fncFindOne(req);
 
-        if (!found) return next(new ErrorResponse(404, 'GroupMembers not found'));
+        if (!found) return next(new ErrorResponse(404, 'Subject not found'));
 
-        return GroupMembers.update(
+        return Subject.update(
             { Status: 2 },
             {
                 where: { ID: id },
             }
         );
     }
+
+  
 }
 
-module.exports = new GroupMembersService();
+module.exports = new SubjectService();

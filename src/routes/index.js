@@ -21,7 +21,7 @@ router.use('/grade', require('./grade.routes'));
 router.use('/hanhkiem', require('./HanhKiem.routes'));
 router.use('/hocluc', require('./HocLuc.routes'));
 router.use('/ketquacanam', require('./KetQuaCaNam.routes'));
-// router.use('/ketquamonhoc', require('./KetQuaMonHoc.routes'));
+router.use('/ketquamonhoc', require('./KetQuaMonHoc.routes'));
 router.use('/point', require('./point.routes'));
 router.use('/role', require('./role.routes'));
 router.use('/semester', require('./semester.routes'));

@@ -3,9 +3,9 @@ const SemesterService = require('../services/semester.service');
 const { successResponse, errorResponse } = require('../libs/response');
 
 module.exports = {
-    findManySemesters: asyncHandler(async (req, res, next) => {
+    findSemesters: asyncHandler(async (req, res, next) => {
         const { page, size } = req.query;
-        const { rows: Semesters, count: total } = await SemesterService.fncFindMany(req, next);
+        const { rows: Semesters, count: total } = await SemesterService.fncFindAll(req, next);
 
         return res.status(200).json({
             success: true,
@@ -18,7 +18,7 @@ module.exports = {
         });
     }),
 
-    findSemesters: asyncHandler(async (req, res, next) => {
+    findSemester: asyncHandler(async (req, res, next) => {
         const Semesters = await SemesterService.fncFindOne(req);
 
         if (Semesters) return res.json(successResponse(200, Semesters));

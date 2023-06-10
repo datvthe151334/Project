@@ -9,13 +9,13 @@ module.exports = (sequelize) => {
          * This method is not a part of Sequelize lifecycle.
          * The `models/index` file will call this method automatically.
          */
-        // static associate({ UserMaster, Department }) {
-        //     // define association here
+        static associate({ Class }) {
+            // define association here
 
-        //     this.belongsTo(Department, {
-        //         foreignKey: 'DepartmentID', // targetKey: 'ID',
-        //     });
-        // }
+            this.belongsTo(Class, {
+                foreignKey: 'ClassID', // targetKey: 'ID',
+            });
+        }
     }
 
     Student.init(
@@ -31,6 +31,7 @@ module.exports = (sequelize) => {
             Code: DataTypes.STRING,
             Gender: DataTypes.STRING,
             DOB: DataTypes.STRING,
+            ClassID:DataTypes.INTEGER,
             Address: DataTypes.STRING,
             PhoneNumber: DataTypes.STRING, //<,>,>=,<=,max,min,=
             CreatedBy: DataTypes.STRING,

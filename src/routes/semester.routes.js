@@ -3,7 +3,7 @@ const MoocCampaignController = require('../controllers/semester.controller');
 
 router.post('/', MoocCampaignController.createSemesters);
 router.get('/', MoocCampaignController.findSemesters);
-router.get('/:id', MoocCampaignController.findManySemesters);
+router.get('/:id', MoocCampaignController.findSemester);
 router.put('/:id', MoocCampaignController.updateSemesters);
 router.delete('/:id', MoocCampaignController.deleteSemesters);
 

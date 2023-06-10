@@ -1,84 +1,52 @@
-const { Op, QueryTypes } = require('sequelize');
-// @ts-ignore
-const { BadgeLevel, Badge, Department, sequelize,RuleDefinition } = require('../models');
+const { Op } = require('sequelize');
 const queryParams = require('../utils/query-params');
-const ErrorResponse = require('../libs/error-response');
-const getAccountFromToken = require('../utils/account-token');
-class BadgeLevelService {
+const ErrorResponse = require('../libs/response');
+const successResponse = require('../libs/response');
+// @ts-ignore
+const { HocLuc } = require('../models');
+class HocLucService {
     async fncFindOne(req) {
         const { id } = req.params;
 
-        return BadgeLevel.findOne({
+        return HocLuc.findOne({
             where: { ID: id },
-            include: [
-                {
-                    model: Badge,
-                },
-            ],
         });
     }
 
-    async fncCreateOne(req, res, next) {
-        const { BadgeID, Name, Description, DepartmentID, ImageURL, LevelNumber, ConversionRate } = req.body;
-        if(BadgeID == undefined || Name == undefined || Description == undefined || DepartmentID == undefined || LevelNumber == undefined || ConversionRate == undefined ){
-            return next(new ErrorResponse(404, 'Data not enough'));
-        }
-        const foundBadgeLevel = await BadgeLevel.findOne({
-            where: { BadgeID: BadgeID, LevelNumber: LevelNumber, DepartmentID: DepartmentID  },
-            
-        });
-        if(foundBadgeLevel){
-            return next(new ErrorResponse(404, 'Badge level is exist'));
-        }
-        
-        if(!req.file && !ImageURL){
-            return next(new ErrorResponse(404, 'Badge must have Image'));
-
-        }
-        return BadgeLevel.create({
-            CreatedBy: getAccountFromToken(req),
-            BadgeID: BadgeID,
-            Name: Name,
-            Description: Description,
-            DepartmentID: DepartmentID,
-            ImageURL: !req.file ? ImageURL : `/public/badge/${req.file.filename}`,
-            LevelNumber: LevelNumber,
-            ConversionRate: ConversionRate,
+    async fncCreateOne(req) {
+        return HocLuc.create({
+            ...req.body,
         });
     }
 
     async fncFindAll(req) {
-        const { DepartmentID, BadgeID } = req.query;
+        const queries = queryParams(
+            req.query,
+            Op,
+            //
+            ['Name',"Code"],
+            ['Name',"Code"]
+        );
 
-        const getLevelBadges = await BadgeLevel.findAndCountAll({
-            where: {
-                DepartmentID: DepartmentID,
-                BadgeID: BadgeID,
-            },
-            order: [['LevelNumber', 'DESC']],
+        return HocLuc.findAndCountAll({
+            order: [['CreatedDate', 'DESC']],
+            where: queries.searchOr,
+         
+            distinct: true,
+            limit: queries.limit,
+            offset: queries.offset,
         });
-        return getLevelBadges;
     }
 
     async fncUpdateOne(req, next) {
         const { id } = req.params;
-        const { DepartmentID } = req.query;
-        const { Name, Description, ConversionRate, LevelNumber, Status, ImageURL } = req.body;
+        const found = await this.fncFindOne(req);
 
-        const found = await BadgeLevel.findOne({ where: { ID: id } });
+        if (!found) return next(new ErrorResponse(404, 'HocLuc not found'));
 
-        if (!found) return next(new ErrorResponse(404, 'BadgeLevel not found'));
-
-        return BadgeLevel.update(
+        return HocLuc.update(
             {
-                Name: Name,
-                Description: Description,
-                DepartmentID: DepartmentID,
-                Status: Status,
-                ImageURL: !req.file ? ImageURL : `/public/badge/${req.file.filename}`,
-                ConversionRate: ConversionRate,
-                LevelNumber: LevelNumber,
-                UpdatedBy: getAccountFromToken(req),
+                ...req.body,
             },
             {
                 where: { ID: id },
@@ -87,22 +55,20 @@ class BadgeLevelService {
     }
 
     async fncDeleteOne(req, next) {
-        const { DepartmentID, id } = req.query;
+        const { id } = req.params;
+        const found = await this.fncFindOne(req);
 
-        const found = await BadgeLevel.findOne({ where: { ID: id } });
+        if (!found) return next(new ErrorResponse(404, 'HocLuc not found'));
 
-        if (!found) return next(new ErrorResponse(404, 'BadgeLevel not found'));
-
-        return BadgeLevel.update(
+        return HocLuc.update(
             { Status: 2 },
             {
-                where: {
-                    ID: id,
-                    DepartmentID: DepartmentID,
-                },
+                where: { ID: id },
             }
         );
     }
+
+  
 }
 
-module.exports = new BadgeLevelService();
+module.exports = new HocLucService();
